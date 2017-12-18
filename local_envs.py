@@ -31,7 +31,7 @@ gym.envs.registration.register(
 gym.envs.registration.register(
     id='RoboschoolReacherTest5-v1',
     entry_point='gym_nreacher:RoboschoolReacher',
-    max_episode_steps=400,
+    max_episode_steps=150,
     reward_threshold=18.0,
     kwargs={'xml': 'reacher5.xml'}
 )

@@ -116,7 +116,7 @@ def train(env_id, num_timesteps, seed):
 def main():
     import local_envs
     with tf.device("/cpu:0"):
-        train('RoboschoolReacherTest4-v1', num_timesteps=1e8, seed=0)
+        train('RoboschoolReacherTest5-v1', num_timesteps=1e8, seed=0)
 
 if __name__ == '__main__':
     mkchdir('experiments/latest')
