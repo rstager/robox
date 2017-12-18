@@ -7,7 +7,9 @@
     <option gravity="0 0 -9.81" integrator="RK4" timestep="0.01"/>
     <worldbody>
         <!-- Arena -->
-        <geom conaffinity="0" contype="0" name="ground" pos="0 0 0" rgba="0.9 0.9 0.9 1" size="1 1 10" type="plane"/>
+        <geom name="floor2" pos="0 0 -3.0" rgba="0.8 0.9 0.8 1" size="40 40 40" type="plane"/>
+        <!--<geom conaffinity="1" condim="3" name="floor" rgba="0.9 0.9 0.9 1" friction="0.8 0.1 0.1" pos="0 0 0" type="plane"/>-->
+        <!--<geom conaffinity="0" contype="0" name="ground" pos="0 0 -.10" rgba="0.9 0.9 0.9 1" size="1 1 .1" type="plane"/>-->
         <geom conaffinity="0" fromto="-.3 -.3 .01 .3 -.3 .01" name="sideS" rgba="0.9 0.4 0.6 1" size=".02"
               type="capsule"/>
         <geom conaffinity="0" fromto=" .3 -.3 .01 .3  .3 .01" name="sideE" rgba="0.9 0.4 0.6 1" size=".02"
@@ -20,25 +22,24 @@
         <geom conaffinity="0" contype="0" fromto="0 0 0 0 0 0.02" name="root" rgba="0.9 0.4 0.6 1" size=".011"
               type="cylinder"/>
         <body name="body0" pos="0 0 .01">
-            <joint axis="0 0 1" limited="false" name="joint3" pos="0 0 0" range="-3.0 3.0" type="hinge"/>
+            <joint axis="0 0 1" limited="false" name="joint3" pos="0 0 0" range="-3.0 3.0" damping="1" type="hinge"/>
             <body name="Humur" pos="0 0 0.005">
-                <joint axis="0 1 0" limited="true" name="joint4" pos="0 0 0" range="-2.7 -1.0" type="hinge"/>
+                <joint axis="0 1 0" limited="true" name="joint4" pos="0 0 0" range="-2.7 -0.5" damping="1" type="hinge"/>
                 <geom fromto="0 0 0 0.1 0 0" name="humur" rgba="0.4 0.4 0.6 1" size=".01" type="capsule"/>
                 <body name="Forearm" pos="0.1 0 0">
                     <joint axis="0 1 0" limited="true" name="joint5" pos="0 0 0" range="0.2 2.7"
-                           type="hinge"/>
+                           damping="1" type="hinge"/>
                     <body name="Forarm2" pos="0 0 0">
-                        <joint axis="1 0 0" limited="true" name="joint6" pos="0 0 0" range="-1.4 1.4"
-                               type="hinge"/>
+                        <joint axis="1 0 0" limited="true" name="joint6" pos="0 0 0" range="-1.8 1.8"
+                               damping="1" type="hinge"/>
                         <geom fromto="0 0 0 0.1 0 0" name="forearm" rgba="0.4 0.4 0.6 1" size=".01"
                               type="capsule"/>
                         <body name="wristtwist" pos="0.1 0 0">
                             <joint axis="0 1 0" limited="true" name="joint7" pos="0 0 0" range="-1.4 1.4"
-                                   type="hinge"/>
+                                   damping="1" type="hinge"/>
                             <body name="wristbend" pos="0 0 0">
                                 <joint axis="1 0 0" limited="true" name="joint8" pos="0 0 0"
-                                       range="-1.4 1.4"
-                                       type="hinge"/>
+                                       range="-1.8 1.8"  damping="1" type="hinge"/>
                                 <geom fromto="0 0 0 0.05 0 0" name="finger" rgba="0.9 0.4 0.6 1" size=".005"
                                       type="capsule"/>
                                 <geom fromto="0.05 0 0 0.05 0 0.02" name="thumb" rgba="1 0 0 1" size=".005"

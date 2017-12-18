@@ -57,19 +57,19 @@ class RoboschoolReacher(RoboschoolMujocoXmlEnv):
         target_z=0
         self.to_target_vec = np.array(self.fingertip.pose().xyz()) - np.array(self.target.pose().xyz())
        #print("state {} {} {} {}".format(target_x,target_y,self.to_target_vec[0], self.to_target_vec[1]))
-        return np.array([target_x, target_y, self.to_target_vec[0], self.to_target_vec[1],
-                         np.cos(self.jointangledot[0,0]),np.sin(self.jointangledot[0,0]),
-                         self.jointangledot[0,1]*0.1,
-                         self.jointangledot[1,0]/np.pi,
-                         self.jointangledot[1,1]*0.1
-                         ])
-        # return np.hstack([
-        #     np.array([target_x,target_y,target_z,self.to_target_vec[0], self.to_target_vec[1], self.to_target_vec[2]]),
-        #     np.cos(self.jointangledot[:, 0]),
-        #     np.sin(self.jointangledot[:, 0]),
-        #     self.jointangledot[:, 0]/np.pi,
-        #     self.jointangledot[:, 1],
-        #     ])
+        # return np.array([target_x, target_y, self.to_target_vec[0], self.to_target_vec[1],
+        #                  np.cos(self.jointangledot[0,0]),np.sin(self.jointangledot[0,0]),
+        #                  self.jointangledot[0,1]*0.1,
+        #                  self.jointangledot[1,0]/np.pi,
+        #                  self.jointangledot[1,1]*0.1
+        #                  ])
+        return np.hstack([
+            np.array([target_x,target_y,target_z,self.to_target_vec[0], self.to_target_vec[1], self.to_target_vec[2]]),
+            np.cos(self.jointangledot[:, 0]),
+            np.sin(self.jointangledot[:, 0]),
+            self.jointangledot[:, 0]/np.pi,
+            self.jointangledot[:, 1]*.01,
+            ])
 
     def calc_potential(self):
         return -100 * np.linalg.norm(self.to_target_vec)
@@ -87,11 +87,11 @@ class RoboschoolReacher(RoboschoolMujocoXmlEnv):
         #print("potent {} {} ecost {} {} {}".format((self.potential - potential_old),self.potential,np.abs(a * self.jointangledot[:, 1]),a,self.jointangledot[:,1]))
         electricity_cost = (
             -0.10 * (np.sum(np.abs(a * self.jointangledot[:, 1]*0.1)))  # work torque*angular_velocity
-            - 0.01 * (np.sum(np.abs(a)))                                # stall torque require some energy
-            )
+            - 0.1 * (np.sum(np.abs(a)))                                # stall torque require some energy
+            )/len(self.joints)
         stuck=np.logical_and(self.limitmask,np.logical_or(np.greater_equal(self.jointangledot[:,0],np.array(self.upperlimits)-0.01),
                                                           np.less_equal(self.jointangledot[:,0],np.array(self.lowerlimits)+0.01)))
-        stuck_joint_cost=-0.1 * np.sum(stuck)
+        stuck_joint_cost=-0.1 * np.sum(stuck)/len(self.joints)
 
         #stuck_joint_cost = -0.1 if np.abs(np.abs(self.gamma)-1) < 0.01 else 0.0
         self.rewards = [float(self.potential - potential_old), float(electricity_cost), float(stuck_joint_cost)]
