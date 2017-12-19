@@ -12,7 +12,7 @@ class RoboschoolReacher(RoboschoolMujocoXmlEnv):
         print(tmp_obs.shape)
         high = np.ones([len(self.joints)])
         self.action_space = gym.spaces.Box(-high, high)
-        high = np.inf * np.ones([len(self.joints) * 4 + 6])
+        high = np.inf * np.ones([len(self.joints) *3 + 6])
         high = np.inf * np.ones_like(tmp_obs)
         self.observation_space = gym.spaces.Box(-high, high)
         self.scene=None
@@ -20,11 +20,11 @@ class RoboschoolReacher(RoboschoolMujocoXmlEnv):
     def create_single_player_scene(self):
         return SingleRobotEmptyScene(gravity=0.0, timestep=0.0165, frame_skip=1)
 
-    TARG_LIMIT = 0.27
+    TARG_LIMIT = 0.15
     def robot_specific_reset(self):
         self.jdict["target_x"].reset_current_position(self.np_random.uniform( low=-self.TARG_LIMIT, high=self.TARG_LIMIT ), 0)
         self.jdict["target_y"].reset_current_position(self.np_random.uniform( low=-self.TARG_LIMIT, high=self.TARG_LIMIT ), 0)
-        #self.jdict["target_z"].reset_current_position(self.np_random.uniform( low=-self.TARG_LIMIT, high=self.TARG_LIMIT ), 0)
+        self.jdict["target_z"].reset_current_position(self.np_random.uniform( low=0, high=self.TARG_LIMIT ), 0)
         self.fingertip = self.parts["fingertip"]
         self.target    = self.parts["target"]
         self.joints=[self.jdict["joint{}".format(i)] for i in range(100) if "joint{}".format(i) in self.jdict]
@@ -67,7 +67,6 @@ class RoboschoolReacher(RoboschoolMujocoXmlEnv):
             np.array([target_x,target_y,target_z,self.to_target_vec[0], self.to_target_vec[1], self.to_target_vec[2]]),
             np.cos(self.jointangledot[:, 0]),
             np.sin(self.jointangledot[:, 0]),
-            self.jointangledot[:, 0]/np.pi,
             self.jointangledot[:, 1]*.01,
             ])
 

@@ -63,7 +63,7 @@ def run():
                     _,_, pi_values, _, _,obfilter = pickle.load(f)
 
                 for tfv in tf.global_variables():
-                    print("{}={}".format(tfv.name,pi_values[tfv.name].shape,pi_values[tfv.name]))
+                    #print("{}={}".format(tfv.name,pi_values[tfv.name].shape,pi_values[tfv.name]))
                     tfv.assign(pi_values[tfv.name]).eval()
                     tfvs[tfv.name]=tfv
 
