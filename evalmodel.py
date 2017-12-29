@@ -4,9 +4,14 @@ import numpy as np
 import gym
 import pickle
 import tensorflow as tf
+from gym import RewardWrapper
+from gym.spaces import Box
+
 import baselines.common.tf_util as U
 
 import roboschool
+from pybullet_envs.bullet import KukaGymEnv
+import pybullet_envs
 from baselines.acktr.acktr_cont import rollout
 from baselines.acktr.filters import ZFilter
 from baselines.acktr.policies import GaussianMlpPolicy
@@ -31,6 +36,8 @@ def eval_model(sess,env,pi, obfilter=None):
             ac, vpred = pi.act(True,ob)
         prev_ob = np.copy(ob)
         ob, rew, new, _ = env.step(ac)
+        obe = env.getExtendedObservation()
+        print(dir(obe))
         if obfilter: ob = obfilter(ob)
         if new:
             ob = env.reset()
@@ -40,11 +47,18 @@ def run():
     filename='config'
 
     with open(filename,'rb') as f:
-        env_id,pitype,tfv,hid_layers,vhid_layers,obfilter=pickle.load(f)
+        spec,pitype,tfv,hid_layers,vhid_layers,obfilter,reward_scale=pickle.load(f)
     print(pitype)
-    env = gym.make(env_id)
+    if 'renders' in spec._kwargs:
+        spec._kwargs['renders']=True
+    env = spec.make()
+    if reward_scale != 1.0:
+        env = RewardWrapper(env)
+        env.reward_scale=reward_scale
+        env._reward=lambda reward:reward/env.reward_scale
     env.reset()
-    print("envid={} obs {} act {}".format(env.spec.id,env.observation_space.shape,env.action_space.shape))
+    print(env.unwrapped)
+    print("envid={} obs {} act {}".format(env.spec.id,env.observation_space,env.action_space.shape))
     #obfilter=ZFilter(env.observation_space.shape)
     with tf.device("/cpu:0"):
         #with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
@@ -55,12 +69,16 @@ def run():
                        hid_layers=hid_layers,vhid_layers=vhid_layers)
             else:
                 with tf.variable_scope("pi"):
-                    pi=GaussianMlpPolicy(env.observation_space.shape[0],env.action_space.shape[0],hid_layers=hid_layers)
+                    if isinstance(env.observation_space,Box):
+                        pi=GaussianMlpPolicy(env.observation_space.shape[0],env.action_space.shape[0],hid_layers=hid_layers)
+                    else:
+                        pi=GaussianMlpPolicy(env.observation_space.spaces[0].shape[0],env.action_space.shape[0],hid_layers=hid_layers)
+
             sess.run(tf.global_variables_initializer())
             while True:
                 mtime = os.stat(filename).st_mtime
                 with open(filename, 'rb') as f:
-                    _,_, pi_values, _, _,obfilter = pickle.load(f)
+                    _,_, pi_values, _, _,obfilter,_ = pickle.load(f)
 
                 for tfv in tf.global_variables():
                     #print("{}={}".format(tfv.name,pi_values[tfv.name].shape,pi_values[tfv.name]))
